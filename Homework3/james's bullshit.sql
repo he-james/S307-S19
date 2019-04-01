@@ -83,4 +83,14 @@ HAVING count(customerid) >= (
 --     so your query needs to be dynamic enough to return all 4 customers who match the  
 --     criteria, without hardcoding anything like “4” in your query.
 
-SELECT o.customerid, p.productid, [orderedquantity] * [productstandardprice] as [Revenue] FROM ORDER_T o, ORDERLINE_T ol, PRODUCT_T p
+SELECT c.customername, c.customerstate
+FROM PRODUCT_T p, ORDERLINE_T ol, CUSTOMER_T c, ORDER_T o
+WHERE c.customerid = o.customerid and o.orderid = ol.orderid and ol.productid = p.productid
+GROUP BY c.customername, c.customerstate
+HAVING SUM(p.ProductStandardPrice * ol.OrderedQuantity) in (
+    SELECT TOP 3 SUM(p.ProductStandardPrice * ol.OrderedQuantity)
+    FROM PRODUCT_T p, ORDERLINE_T ol, CUSTOMER_T c, ORDER_T o
+    WHERE c.customerid = o.customerid and o.orderid = ol.orderid and ol.productid = p.productid
+    GROUP BY c.customerid
+    ORDER BY SUM(p.ProductStandardPrice * ol.OrderedQuantity)
+);
