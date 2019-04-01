@@ -73,6 +73,17 @@ HAVING count(customerid) >= (
 --    along with the customer ID and name for the customer who has bought the most of that 
 --    product; also show the total quantity ordered by that customer (who has bought the 
 --    most of that product). Use a correlated subquery:
+select ol.ProductID, p.ProductDescription, c.CustomerID, c.CustomerName, sum(ol.OrderedQuantity) as [TotOrdered]
+from OrderLine_T ol, Customer_T c, Order_T o, Product_T p
+where ol.ProductID = p.ProductID and ol.OrderID = o.OrderID and o.CustomerID = c.CustomerID 
+group by p.ProductDescription, ol.ProductID, c.CustomerID, c.CustomerName, ol.OrderID
+having sum(ol.orderedquantity) in (
+	select sum(ol2.OrderedQuantity)
+	from OrderLine_T ol2
+	where ol.OrderId = ol2.OrderId
+	group by ol2.ProductID) 
+order by ol.ProductID asc
+;
 
 -- 10. Write a query to get the product(s) whose total order is the lowest in the organization.  
 --     Base the total order on revenue generated (standard price * order quantity).  Outout  
