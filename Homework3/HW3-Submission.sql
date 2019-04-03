@@ -3,22 +3,13 @@
 SELECT c.customerid as [customers] FROM CUSTOMER_T c
 EXCEPT SELECT o.customerid FROM ORDER_T o;
 
--- 2. List the names and numbers of employees supervised (label this value HeadCount) for
---    all the supervisors who supervise more than two employees:
-
------ DOUBLE CHECK THIS ONE
---    ^^^^^^^^^^^^^^^^^^^^^
-
-SELECT employeename, COUNT(employeesupervisor) as [HeadCount] 
-FROM EMPLOYEE_T
-GROUP BY employeename
-HAVING COUNT(employeesupervisor) >= 2;
+-- 2. Ignore problem.
 
 -- 3. Names of states where customers reside, but have no employees residing in that state:
 
 SELECT customerstate 
 FROM CUSTOMER_T 
-MINUS
+EXCEPT
 SELECT employeestate 
 FROM EMPLOYEE_T;
 
@@ -32,18 +23,15 @@ LEFT JOIN ORDER_T o on c.customerid = o.customerid;
 -- 5. Show the customer ID and name for all the customers who have ordered both products 
 -- 	  with IDs 5 and 4 on the same order:
 
---------------- DOES NOT REMOVE DUPLICATES. unsure if we need to
----             ^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-SELECT c.customerid, o.orderid, ol.productid 
+SELECT distinct c.customerid, c.customername
 FROM CUSTOMER_T c, ORDER_T o, OrderLine_T ol
-WHERE ol.productid in (5,4) 
-GROUP BY c.customerid, o.OrderID, ol.productid;
+WHERE ol.productid in (5,5) and ol.productid in (4,4)
+GROUP BY c.customerid, c.customername;
 
 -- 6. List the IDs and names of all products that cost less than the average product price 
 --    in their product line.
 
-SELECT productid, productstandardprice, productlineid FROM PRODUCT_T
+SELECT productid, productdescription FROM PRODUCT_T
 WHERE productstandardprice < (SELECT AVG(productstandardprice) FROM PRODUCT_T);
 
 -- 7. List the IDs and names of those sales territories that have at least 50 percent more 
@@ -111,4 +99,4 @@ HAVING SUM(p.ProductStandardPrice * ol.OrderedQuantity) in (
     FROM PRODUCT_T p, ORDERLINE_T ol, CUSTOMER_T c, ORDER_T o
     WHERE c.customerid = o.customerid and o.orderid = ol.orderid and ol.productid = p.productid
     GROUP BY c.customerid
-    ORDER BY SUM(p.ProductStandardPrice * ol.OrderedQuantity));
+ORDER BY SUM(p.ProductStandardPrice * ol.OrderedQuantity));
