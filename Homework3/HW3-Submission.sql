@@ -23,10 +23,12 @@ LEFT JOIN ORDER_T o on c.customerid = o.customerid;
 -- 5. Show the customer ID and name for all the customers who have ordered both products 
 -- 	  with IDs 5 and 4 on the same order:
 
-SELECT distinct c.customerid, c.customername
-FROM CUSTOMER_T c, ORDER_T o, OrderLine_T ol
-WHERE ol.productid in (5,5) and ol.productid in (4,4)
-GROUP BY c.customerid, c.customername;
+SELECT c.customerid, c.customername
+FROM CUSTOMER_T c, ORDER_T o, ORDERLINE_T ol
+WHERE c.customerid = o.customerid
+AND o.orderid = ol.orderid
+AND ol.productid = 5
+AND ol.orderid in (SELECT orderid FROM ORDERLINE_T WHERE productid = 4);
 
 -- 6. List the IDs and names of all products that cost less than the average product price 
 --    in their product line.
