@@ -1,0 +1,19 @@
+--1  We want to figure out the average cost per patient, per day.  Recall we calculate the cost for
+--each patient using dose (how much of the drug the patient received) and drug_cost (the cost per dose).--To complete this query, output the patient name and the average cost per day (using the number of--days a patient was in the hospital in your calculation). Call this field "Average Cost/Day".  Round this --to the nearest two decimal places.  WE want to narrow the results to any patient where the --"Average Cost/Day" is at least 100.  Order your output by "Average Cost/Day" ascending.
+select p.patient_name, sum(t.dose * d.drug_cost)/datediff(day, v.admit_date ,v.discharge_date) as "Average Cost/Day"from therapy t, drug d, patient p, visit vwhere d.drug_id = t.drug_id and p.patient_id = t.patient_id and p.patient_id = v.patient_idgroup by p.patient_name, v.discharge_date, v.admit_datehaving sum(t.dose * d.drug_cost)/datediff(day, v.admit_date ,v.discharge_date) >= 100order by "Average Cost/Day" asc;
+
+--2  Output the physician name, drug name, and the number of times the drug was used in a therapy.  --Call this field "Number Prescribed".  We want to filter the results to show only drugs where the dose --given was at least as large as the average dose for all drugs.
+
+select physician_name, drug_name, count(t.drug_id) as "Number Prescribed"from drug d, therapy t, patient p, physician phwhere d.drug_id = t.drug_id and p.patient_id = t.patient_id and p.physician_id = ph.physician_id and t.dose >= all(select avg(dose)from therapy)group by physician_name, drug_name;
+
+
+--3  We want to identify the patients who are on the highest number of drugs.  If I were to look in the --therapy table, I could see the patient's id number and the drug id for all of the drugs the patient is  --given.  We are specifically looking for the top 3 patients (on the highest number of drugs).  There is a --tie, so the query needs to by dynamic enough to work even when there is a tie.  Your final output should be--the patient name, the number of days the patient was in the hospital called "Length of Stay", and the patient's--Age.  Round Age to the nearest whole number.
+
+select p.patient_name, datediff(day, v.admit_date, v.discharge_date) as "Length of Stay", datediff(year, dob, GetDate()) as "Age"from patient p, therapy t, visit vwhere p.patient_id = v.patient_id and p.patient_id = t.patient_idgroup by  p.patient_name, v.admit_date, v.discharge_date, dobhaving count(distinct t.drug_id) in (select top 3 count(distinct drug_id)from therapygroup by patient_idorder by count(distinct drug_id) desc);
+
+
+-- 4  We want to figure out the drug(s) that was given to the most patients.  Recall, when a drug is given to a patient, it is--recorded in the therapy table. The patient id, and the drug id are both recorded in the therapy table, showing the patient--received the drug.  Determine which drug(s) was given to the most patients (do not focus on dose but look at how many patients--received the drug).  Once you've determined which drug was given to the most patients, your final output should be the name of --the patient, and how long the patient was in the hospital.  Call this field "Length of Stay".  Hint, more than 1 drug ties for--the top drug given most often to patients.  Your query needs to be dynamic, so nothing hardcoded except the retrieval of the--top 1 record where it is appropriate to do so.
+
+
+select distinct patient_name, datediff(day, v.admit_date, v.discharge_date) as "Length of Stay"from patient p, visit v, therapy twhere p.patient_id = v.patient_id and p.patient_id = t.patient_id and t.drug_id in (select drug_idfrom therapygroup by drug_idhaving count(distinct patient_id) = (select top 1 count(distinct t.patient_id) as "countofpatients"from patient p, therapy twhere p.patient_id = t.patient_idgroup by t.drug_idorder by count(distinct t.patient_id) desc));
+
