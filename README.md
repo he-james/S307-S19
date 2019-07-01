@@ -2,12 +2,10 @@
 Spring 2019, S307 Notes
 
 ## Contents
+Includes notes on "Advanced SQL" lectures, homework, and other logic puzzles. Course: Kelley BUS-S307 Data Management
 
-### Notes
-
-- Includes notes on "Advanced SQL" lectures, starting with Order Management problems
-- March 25, 2019 lectures
-
-### Homework3
-
-- Includes Homework 3 assignment. Still incomplete.
+Includes notes on:
+  - Creating tables
+  - Queries and subqueries
+  - Correlated subqueries
+  - Some logic puzzles
